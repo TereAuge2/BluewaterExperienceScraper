@@ -221,4 +221,4 @@ for year in range(start_year, end_year+1):
 df_final_sorted = df_final.sort_values(by="total sail time (hrs)", ascending=False)
 # df_final_sorted = df_final.sort_values(by="number sails", ascending=False)
 print(df_final_sorted)
-df_final_sorted.to_csv("sailing_data.csv", index=False)
+df_final_sorted.to_csv("sailing_data_2024.csv", index=False)
