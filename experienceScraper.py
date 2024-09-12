@@ -13,16 +13,16 @@ from datetime import datetime
 
 
 def get_trip_urls(year=2024,month=9):
-    url = f"https://sailing.mit.edu/calendar/index.php?cal=month&year={year}&month={month}&type=13"
+    url = f"http://sailing.mit.edu/calendar/index.php?cal=month&year={year}&month={month}&type=13"
     page = urlopen(url)
 
     html_bytes = page.read()
-    html = html_bytes.decode("utf-8")
+    html = html_bytes.decode("utf-8", errors='ignore')
 
     pattern = r"(/calendar/events/event[^']*')"
     matches = re.findall(pattern, html)
 
-    base_url = "https://sailing.mit.edu"
+    base_url = "http://sailing.mit.edu"
     updated_matches = [base_url + match[:-1] for match in matches]
 
     # Replace event.php with entries.php
@@ -62,13 +62,13 @@ def get_time_data(html):
     return start_datetime, end_datetime, hours_elapsed
 
 def is_racing(html):
-    url = re.search(r'href=\'/calendar/events/event.php([^"]*)\'>Description', html)
+    url = re.search(r'/calendar/events/event.php([^"]*)\'>Description', html)
     if not url:
         return False
-    url = base_url = "https://sailing.mit.edu/calendar/events/event.php"+ url.group(1)
+    url = base_url = "http://sailing.mit.edu/calendar/events/event.php"+ url.group(1)
     page = urlopen(url)
     html_bytes = page.read()
-    html = html_bytes.decode("utf-8")
+    html = html_bytes.decode("utf-8", errors='ignore')
 
     description = re.search(r'<h2>Description</h2>(.*?)<h2>Organizers</h2>', html, re.DOTALL)
     if not description:
@@ -121,7 +121,7 @@ def get_all_participant_data(year, month):
     for url in urls:
         page = urlopen(url)
         html_bytes = page.read()
-        html = html_bytes.decode("utf-8")
+        html = html_bytes.decode("utf-8", errors='ignore')
 
         title = get_title(html)
         start, end, hours = get_time_data(html)
@@ -156,10 +156,15 @@ columns = [
 ]
 df_final = pd.DataFrame(columns=columns)
 
-years = [2024]
-months = [1,2,3,4,5,6,7,8,9,10,11,12]
-for year in years:
-    for month in [8,9]:
+start_year = 2024
+start_month = 1
+end_year = 2024
+end_month = 12
+
+for year in range(start_year, end_year+1):
+    for month in range(start_month, end_month+1):
+        if year == end_year and month > end_month:
+            break
         df_all = get_all_participant_data(year, month)
         for index, row in df_all.iterrows():
             first_name = row["first name"]
