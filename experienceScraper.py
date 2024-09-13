@@ -12,7 +12,7 @@ from urllib.request import urlopen
 from datetime import datetime
 
 
-def get_trip_urls(year=2024,month=9):
+def get_trip_urls(year,month):
     url = f"http://sailing.mit.edu/calendar/index.php?cal=month&year={year}&month={month}&type=13"
     page = urlopen(url)
 
@@ -156,13 +156,15 @@ columns = [
 ]
 df_final = pd.DataFrame(columns=columns)
 
-start_year = 2024
+start_year = 2007
 start_month = 1
 end_year = 2024
-end_month = 12
+end_month = 11 # December 2024 doesn't exist, and defaults to September 2024. https://sailing.mit.edu/calendar/index.php?cal=month&year=2024&month=12
 
 for year in range(start_year, end_year+1):
-    for month in range(start_month, end_month+1):
+    for month in range(1, 13):
+        if year == start_year and month < start_month:
+            continue
         if year == end_year and month > end_month:
             break
         df_all = get_all_participant_data(year, month)
@@ -221,4 +223,4 @@ for year in range(start_year, end_year+1):
 df_final_sorted = df_final.sort_values(by="total sail time (hrs)", ascending=False)
 # df_final_sorted = df_final.sort_values(by="number sails", ascending=False)
 print(df_final_sorted)
-df_final_sorted.to_csv("sailing_data_2024.csv", index=False)
+df_final_sorted.to_csv("sailing_data_all_time.csv", index=False)
