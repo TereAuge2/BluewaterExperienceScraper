@@ -115,6 +115,9 @@ def get_skippers(html):
             details.append((last_name, first_name, "Skipper"))
     return details
 
+def river_sail(title):
+    return "river" in title.lower()
+
 def get_all_participant_data(year, month):
     urls = get_trip_urls(year, month)
     data=[]
@@ -145,6 +148,9 @@ def get_all_participant_data(year, month):
     df = pd.DataFrame(data, columns=[
         "first name", "last name", "trip name", "start", "end", "duration", "race", "status"
     ])
+    df = df[~df["trip name"].apply(river_sail)]
+    df = df.drop_duplicates(subset=["first name", "last name", "trip name", "start", "end", "duration", "race", "status"], keep="first")
+    df = df.reset_index(drop=True)
     return df
 
 
